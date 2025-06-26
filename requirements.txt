@@ -1,0 +1,9 @@
+Flask
+Flask-CORS
+numpy
+pandas
+matplotlib
+Pillow
+scikit-image
+opencv-python
+Werkzeug
