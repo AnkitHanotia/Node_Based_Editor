@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import ReactFlow, {
   addEdge,
   useNodesState,
@@ -11,6 +11,7 @@ import ReactFlow, {
 import NodePanel from './components/NodePanel';
 import PreviewPanel from './components/PreviewPanel';
 import Toolbar from './components/Toolbar';
+import AllNodesMenu from './components/AllNodesMenu';
 import { createNode, getNodeConfig } from './utils/nodeFactory';
 import { processGraph, addNode as addNodeAPI, addConnection as addConnectionAPI, uploadImage, downloadImage, saveGraph, loadGraph, removeNode, removeConnection } from './utils/api';
 import './App.css';
@@ -27,6 +28,33 @@ import ColorChannelNode from './components/nodes/ColorChannelNode';
 import CustomKernelNode from './components/nodes/CustomKernelNode';
 import OutputNode from './components/nodes/OutputNode';
 import CustomEdge from './components/edges/CustomEdge';
+import BitPlaneSlicingNode from './components/nodes/BitPlaneSlicingNode';
+import HistogramEqualizationNode from './components/nodes/HistogramEqualizationNode';
+import ContrastStretchingNode from './components/nodes/ContrastStretchingNode';
+import LogPowerLawNode from './components/nodes/LogPowerLawNode';
+import ImageNegationNode from './components/nodes/ImageNegationNode';
+import GrayLevelSlicingNode from './components/nodes/GrayLevelSlicingNode';
+import MedianFilterNode from './components/nodes/MedianFilterNode';
+import LaplacianFilterNode from './components/nodes/LaplacianFilterNode';
+import SobelFilterNode from './components/nodes/SobelFilterNode';
+import FourierTransformNode from './components/nodes/FourierTransformNode';
+import HighPassFilterNode from './components/nodes/HighPassFilterNode';
+import LowPassFilterNode from './components/nodes/LowPassFilterNode';
+import ResizeBiggerNode from './components/nodes/ResizeBiggerNode';
+import ResizeSmallerNode from './components/nodes/ResizeSmallerNode';
+import StretchNode from './components/nodes/StretchNode';
+import CropNode from './components/nodes/CropNode';
+import RotateNode from './components/nodes/RotateNode';
+import AverageFilteringNode from './components/nodes/AverageFilteringNode';
+import WeightedFilteringNode from './components/nodes/WeightedFilteringNode';
+import MedianFilteringNode from './components/nodes/MedianFilteringNode';
+import LaplacianMaskNode from './components/nodes/LaplacianMaskNode';
+import GaussianKernelNode from './components/nodes/GaussianKernelNode';
+import UnsharpMaskingNode from './components/nodes/UnsharpMaskingNode';
+import HighBoostFilteringNode from './components/nodes/HighBoostFilteringNode';
+import ConvolutionNode from './components/nodes/ConvolutionNode';
+import CrossCorrelationNode from './components/nodes/CrossCorrelationNode';
+import GLCMNode from './components/nodes/GLCMNode';
 
 // Place these after imports, before App definition
 let handleRemoveNodeGlobal = null;
@@ -42,6 +70,33 @@ const nodeTypes = {
   colorChannelNode: (props) => <ColorChannelNode {...props} onRemove={handleRemoveNodeGlobal} />,
   customKernelNode: (props) => <CustomKernelNode {...props} onRemove={handleRemoveNodeGlobal} />,
   outputNode: (props) => <OutputNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  bitPlaneSlicingNode: (props) => <BitPlaneSlicingNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  histogramEqualizationNode: (props) => <HistogramEqualizationNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  contrastStretchingNode: (props) => <ContrastStretchingNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  logPowerLawNode: (props) => <LogPowerLawNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  imageNegationNode: (props) => <ImageNegationNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  grayLevelSlicingNode: (props) => <GrayLevelSlicingNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  medianFilterNode: (props) => <MedianFilterNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  laplacianFilterNode: (props) => <LaplacianFilterNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  sobelFilterNode: (props) => <SobelFilterNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  fourierTransformNode: (props) => <FourierTransformNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  highPassFilterNode: (props) => <HighPassFilterNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  lowPassFilterNode: (props) => <LowPassFilterNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  resizeBiggerNode: (props) => <ResizeBiggerNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  resizeSmallerNode: (props) => <ResizeSmallerNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  stretchNode: (props) => <StretchNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  cropNode: (props) => <CropNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  rotateNode: (props) => <RotateNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  averageFilteringNode: (props) => <AverageFilteringNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  weightedFilteringNode: (props) => <WeightedFilteringNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  medianFilteringNode: (props) => <MedianFilteringNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  laplacianMaskNode: (props) => <LaplacianMaskNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  gaussianKernelNode: (props) => <GaussianKernelNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  unsharpMaskingNode: (props) => <UnsharpMaskingNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  highBoostFilteringNode: (props) => <HighBoostFilteringNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  convolutionNode: (props) => <ConvolutionNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  crossCorrelationNode: (props) => <CrossCorrelationNode {...props} onRemove={handleRemoveNodeGlobal} />,
+  glcmNode: (props) => <GLCMNode {...props} onRemove={handleRemoveNodeGlobal} />,
 };
 
 const edgeTypes = {
@@ -56,20 +111,34 @@ const App = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState({});
   const fileInputRef = React.useRef();
+  const [showAllNodesMenu, setShowAllNodesMenu] = useState(false);
+  const latestRequestId = useRef(0);
+
+  // Add refs for nodes and edges after useState declarations
+  const nodesRef = useRef(nodes);
+  const edgesRef = useRef(edges);
+
+  // Keep refs updated with latest state
+  useEffect(() => { nodesRef.current = nodes; }, [nodes]);
+  useEffect(() => { edgesRef.current = edges; }, [edges]);
 
   // Process the entire graph
   const processGraphData = useCallback(async () => {
     console.log('Processing graph...');
     setIsProcessing(true);
+    // Increment and capture requestId
+    const requestId = ++latestRequestId.current;
     try {
-      // Convert nodes and edges to backend format
+      // Use refs for always-fresh state
+      const currentNodes = nodesRef.current;
+      const currentEdges = edgesRef.current;
       const nodeUpdates = {};
-      nodes.forEach(node => {
+      currentNodes.forEach(node => {
         if (node.data.params) {
           nodeUpdates[node.id] = node.data.params;
         }
       });
-      const connections = edges.map(edge => ({
+      const connections = currentEdges.map(edge => ({
         from_node: edge.source,
         from_socket: edge.sourceHandle,
         to_node: edge.target,
@@ -78,9 +147,14 @@ const App = () => {
       console.log('Sending to backend:', { nodeUpdates, connections });
       const response = await processGraph(nodeUpdates, connections);
       console.log('Backend response:', response);
+      // Only update UI if this is the latest request
+      if (requestId !== latestRequestId.current) {
+        console.log('Stale response ignored:', requestId, latestRequestId.current);
+        return;
+      }
       if (response.success && response.results) {
         // Find output node and set preview
-        const outputNode = nodes.find(node => node.type === 'outputNode');
+        const outputNode = currentNodes.find(node => node.type === 'outputNode');
         console.log('Output node:', outputNode);
         if (outputNode && response.results[outputNode.id]) {
           const outputResult = response.results[outputNode.id];
@@ -104,17 +178,42 @@ const App = () => {
             return node;
           })
         );
+        // Update selectedNode to latest node data (important for Output Node)
+        setSelectedNode((prevSelected) => {
+          if (!prevSelected) return null;
+          const updatedNode = currentNodes.find(n => n.id === prevSelected.id);
+          if (!updatedNode) return null;
+          // Merge in latest preview and metadata if available
+          const result = response.results[updatedNode.id];
+          if (result) {
+            return {
+              ...updatedNode,
+              data: {
+                ...updatedNode.data,
+                metadata: result.metadata || updatedNode.data.metadata,
+                preview: result.preview
+              }
+            };
+          }
+          return updatedNode;
+        });
       }
     } catch (error) {
+      if (requestId !== latestRequestId.current) {
+        // Ignore errors from stale requests
+        return;
+      }
       console.error('Error processing graph:', error);
     } finally {
-      setIsProcessing(false);
+      if (requestId === latestRequestId.current) {
+        setIsProcessing(false);
+      }
     }
-  }, [nodes, edges, setNodes]);
+  }, []); // Remove nodes, edges, setNodes from deps, use refs instead
 
   // Debounced version to prevent spamming the backend
   const debouncedProcessGraphData = useCallback(
-    debounce(processGraphData, 400), 
+    debounce(() => { processGraphData(); }, 400),
     [processGraphData]
   );
 
@@ -123,8 +222,14 @@ const App = () => {
     console.log('Connecting nodes:', params);
     // Find the target node
     const targetNode = nodes.find(node => node.id === params.target);
+    const sourceNode = nodes.find(node => node.id === params.source);
     if (!targetNode) {
       window.alert('Target node not found.');
+      return;
+    }
+    // Prevent connecting non-FFT to high/low pass filter
+    if ((targetNode.type === 'lowPassFilterNode' || targetNode.type === 'highPassFilterNode') && sourceNode && sourceNode.type !== 'fourierTransformNode') {
+      window.alert('You must connect a Fourier Transform (FFT) node to this filter.');
       return;
     }
     // Count current input edges for the target node
@@ -173,10 +278,12 @@ const App = () => {
     // Add node to backend
     try {
       await addNodeAPI(newNode.id, newNode.type, newNode.data.params);
+      // Process the graph to update outputs
+      debouncedProcessGraphData();
     } catch (error) {
       console.error('Error adding node to backend:', error);
     }
-  }, [setNodes]);
+  }, [setNodes, debouncedProcessGraphData]);
 
   // Update node parameters
   const updateNodeParams = useCallback((nodeId, params) => {
@@ -189,6 +296,16 @@ const App = () => {
       )
     );
   }, [setNodes]);
+
+  // Debounced parameter update handler for all nodes
+  const debouncedHandleParamUpdate = useMemo(
+    () => debounce((nodeId, params) => {
+      setIsProcessing(true);
+      updateNodeParams(nodeId, params);
+      debouncedProcessGraphData();
+    }, 300),
+    [updateNodeParams, debouncedProcessGraphData]
+  );
 
   // Handle file upload
   const handleFileUpload = useCallback(async (file, nodeId) => {
@@ -223,13 +340,6 @@ const App = () => {
       console.error('Error uploading image:', error);
     }
   }, [setNodes, debouncedProcessGraphData]);
-
-  // Process graph when parameters change
-  const handleParamUpdate = useCallback((nodeId, params) => {
-    updateNodeParams(nodeId, params);
-    // Trigger graph processing after a short delay to avoid too many requests
-    debouncedProcessGraphData();
-  }, [updateNodeParams, debouncedProcessGraphData]);
 
   // Download output image
   const handleDownload = useCallback(async () => {
@@ -452,14 +562,27 @@ const App = () => {
     }
   }, [edges, setEdges, debouncedProcessGraphData]);
 
+  // Handlers for All Nodes menu
+  const handleAllNodesHover = () => setShowAllNodesMenu(true);
+  const handleAllNodesLeave = () => setShowAllNodesMenu(false);
+
   return (
     <div className="app">
-      <Toolbar 
-        onSave={handleSaveGraph}
-        onLoad={handleLoadGraph}
-        onDownload={handleDownload}
-        isProcessing={isProcessing}
-      />
+      <div className="all-nodes-menu-wrapper" onMouseLeave={handleAllNodesLeave}>
+        <Toolbar
+          onSave={handleSaveGraph}
+          onLoad={handleLoadGraph}
+          onDownload={handleDownload}
+          isProcessing={isProcessing}
+          onAllNodesHover={handleAllNodesHover}
+        />
+        {showAllNodesMenu && (
+          <AllNodesMenu
+            onAddNode={addNodeToCanvas}
+            onClose={handleAllNodesLeave}
+          />
+        )}
+      </div>
       <input
         type="file"
         accept="application/json"
@@ -492,11 +615,13 @@ const App = () => {
         </div>
         
         <PreviewPanel 
-          image={previewImage} 
+          image={selectedNode?.data?.preview || previewImage} 
           selectedNode={selectedNode}
-          onUpdateParams={handleParamUpdate}
+          onUpdateParams={debouncedHandleParamUpdate}
           onFileUpload={handleFileUpload}
           uploadedFiles={uploadedFiles}
+          nodes={nodes}
+          edges={edges}
         />
       </div>
     </div>

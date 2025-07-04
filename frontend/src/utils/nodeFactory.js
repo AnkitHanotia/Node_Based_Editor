@@ -94,6 +94,233 @@ const nodeTypes = {
     inputs: ['image'],
     outputs: [],
     defaultParams: {}
+  },
+  bitPlaneSlicing: {
+    name: 'Bit-plane Slicing',
+    description: 'Extract or compose bit-planes from image',
+    type: 'bitPlaneSlicingNode',
+    inputs: ['image'],
+    outputs: ['image'],
+    defaultParams: {
+      bit_plane: 0,
+      mode: 'single' // 'single' or 'composite'
+    }
+  },
+  histogramEqualization: {
+    name: 'Histogram Equalization',
+    description: 'Enhance image contrast using histogram equalization',
+    type: 'histogramEqualizationNode',
+    inputs: ['image'],
+    outputs: ['image'],
+    defaultParams: {}
+  },
+  contrastStretching: {
+    name: 'Contrast Stretching',
+    description: 'Stretch the contrast of the image',
+    type: 'contrastStretchingNode',
+    inputs: ['image'],
+    outputs: ['image'],
+    defaultParams: { min: 0, max: 255 }
+  },
+  logPowerLaw: {
+    name: 'Log/Power-law Transform',
+    description: 'Apply log or power-law (gamma) transformation',
+    type: 'logPowerLawNode',
+    inputs: ['image'],
+    outputs: ['image'],
+    defaultParams: { mode: 'log', gamma: 1.0 }
+  },
+  imageNegation: {
+    name: 'Image Negation',
+    description: 'Invert the image (negative)',
+    type: 'imageNegationNode',
+    inputs: ['image'],
+    outputs: ['image'],
+    defaultParams: {}
+  },
+  grayLevelSlicing: {
+    name: 'Gray-level Slicing',
+    description: 'Highlight specific gray levels in the image',
+    type: 'grayLevelSlicingNode',
+    inputs: ['image'],
+    outputs: ['image'],
+    defaultParams: { min: 100, max: 200, highlight: true }
+  },
+  medianFilter: {
+    name: 'Median Filter',
+    description: 'Apply median filtering',
+    type: 'medianFilterNode',
+    inputs: ['image'],
+    outputs: ['image'],
+    defaultParams: { kernel_size: 3 }
+  },
+  laplacianFilter: {
+    name: 'Laplacian Filter',
+    description: 'Apply Laplacian filtering',
+    type: 'laplacianFilterNode',
+    inputs: ['image'],
+    outputs: ['image'],
+    defaultParams: { }
+  },
+  sobelFilter: {
+    name: 'Sobel Filter',
+    description: 'Apply Sobel edge detection',
+    type: 'sobelFilterNode',
+    inputs: ['image'],
+    outputs: ['image'],
+    defaultParams: { }
+  },
+  fourierTransform: {
+    name: 'Fourier Transform (FFT)',
+    description: 'Compute the Fast Fourier Transform of the input image.',
+    type: 'fourierTransformNode',
+    inputs: ['image'],
+    outputs: ['fft'],
+    defaultParams: {}
+  },
+  highPassFilter: {
+    name: 'High-pass Filtering',
+    description: 'Apply a high-pass filter in the frequency domain.',
+    type: 'highPassFilterNode',
+    inputs: ['fft'],
+    outputs: ['filtered'],
+    defaultParams: { cutoff: 30 }
+  },
+  lowPassFilter: {
+    name: 'Low-pass Filtering',
+    description: 'Apply a low-pass filter in the frequency domain.',
+    type: 'lowPassFilterNode',
+    inputs: ['fft'],
+    outputs: ['filtered'],
+    defaultParams: { cutoff: 30 }
+  },
+  resizeBigger: {
+    name: 'Resize (Bigger)',
+    description: 'Resize the image to a larger scale',
+    type: 'resizeBiggerNode',
+    inputs: ['image'],
+    outputs: ['image'],
+    defaultParams: { scale: 2.0 }
+  },
+  resizeSmaller: {
+    name: 'Resize (Smaller)',
+    description: 'Resize the image to a smaller scale',
+    type: 'resizeSmallerNode',
+    inputs: ['image'],
+    outputs: ['image'],
+    defaultParams: { scale: 0.5 }
+  },
+  stretch: {
+    name: 'Stretch',
+    description: 'Stretch the image width or height',
+    type: 'stretchNode',
+    inputs: ['image'],
+    outputs: ['image'],
+    defaultParams: { width_scale: 2.0, height_scale: 1.0 }
+  },
+  crop: {
+    name: 'Crop',
+    description: 'Crop a region from the image',
+    type: 'cropNode',
+    inputs: ['image'],
+    outputs: ['image'],
+    defaultParams: { x: 0, y: 0, width: 100, height: 100 }
+  },
+  rotate: {
+    name: 'Rotate',
+    description: 'Rotate the image by a given angle',
+    type: 'rotateNode',
+    inputs: ['image'],
+    outputs: ['image'],
+    defaultParams: { angle: 90 }
+  },
+  averageFiltering: {
+    name: 'Average Filtering',
+    description: 'Apply average (mean) filter',
+    type: 'averageFilteringNode',
+    inputs: ['image'],
+    outputs: ['image'],
+    defaultParams: { kernel_size: 3 }
+  },
+  gaussianFiltering: {
+    name: 'Gaussian Filtering',
+    description: 'Apply Gaussian filter',
+    type: 'gaussianBlurNode',
+    inputs: ['image'],
+    outputs: ['image'],
+    defaultParams: { radius: 1.0 }
+  },
+  weightedFiltering: {
+    name: 'Weighted Filtering',
+    description: 'Apply weighted filter',
+    type: 'weightedFilteringNode',
+    inputs: ['image'],
+    outputs: ['image'],
+    defaultParams: { kernel: [[1,2,1],[2,4,2],[1,2,1]] }
+  },
+  medianFiltering: {
+    name: 'Median Filtering',
+    description: 'Apply median filter',
+    type: 'medianFilteringNode',
+    inputs: ['image'],
+    outputs: ['image'],
+    defaultParams: { kernel_size: 3 }
+  },
+  laplacianMask: {
+    name: 'Laplacian Mask',
+    description: 'Apply Laplacian mask',
+    type: 'laplacianMaskNode',
+    inputs: ['image'],
+    outputs: ['image'],
+    defaultParams: { kernel: [[0,1,0],[1,-4,1],[0,1,0]] }
+  },
+  gaussianKernel: {
+    name: 'Gaussian Kernel',
+    description: 'Apply Gaussian kernel',
+    type: 'gaussianKernelNode',
+    inputs: ['image'],
+    outputs: ['image'],
+    defaultParams: { kernel_size: 3 }
+  },
+  unsharpMasking: {
+    name: 'Unsharp Masking',
+    description: 'Apply unsharp masking',
+    type: 'unsharpMaskingNode',
+    inputs: ['image'],
+    outputs: ['image'],
+    defaultParams: { amount: 1.0, radius: 1.0 }
+  },
+  highBoostFiltering: {
+    name: 'High-Boost Filtering',
+    description: 'Apply high-boost filtering',
+    type: 'highBoostFilteringNode',
+    inputs: ['image'],
+    outputs: ['image'],
+    defaultParams: { boost_factor: 1.5 }
+  },
+  convolution: {
+    name: 'Convolution',
+    description: 'Apply convolution with custom kernel',
+    type: 'convolutionNode',
+    inputs: ['image'],
+    outputs: ['image'],
+    defaultParams: { kernel: [[1,0,-1],[1,0,-1],[1,0,-1]] }
+  },
+  crossCorrelation: {
+    name: 'Cross-Correlation',
+    description: 'Apply cross-correlation with custom kernel',
+    type: 'crossCorrelationNode',
+    inputs: ['image'],
+    outputs: ['image'],
+    defaultParams: { kernel: [[1,0,1],[0,1,0],[1,0,1]] }
+  },
+  glcm: {
+    name: 'GLCM',
+    description: 'Compute Gray Level Co-occurrence Matrix',
+    type: 'glcmNode',
+    inputs: ['image'],
+    outputs: ['glcm'],
+    defaultParams: { distances: [1], angles: [0], levels: 8 }
   }
 };
 
@@ -159,4 +386,8 @@ export const getNodeTypes = () => {
 
 export const getNodeConfig = (nodeType) => {
   return nodeTypes[nodeType];
-}; 
+};
+
+// If there is a mapping like: export const nodeTypeToComponent = { ... }, add:
+// bitPlaneSlicingNode: BitPlaneSlicingNode,
+// ... existing code ... 

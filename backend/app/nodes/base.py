@@ -1,3 +1,4 @@
+# NOTE: All print statements in this file use custom_print for easier debugging and global statement counting.
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
@@ -5,6 +6,7 @@ matplotlib.use('Agg')  # Use non-interactive backend
 import io
 import base64
 from abc import ABC, abstractmethod
+from app import custom_print
 
 class BaseNode(ABC):
     def __init__(self, node_id, params=None):
@@ -25,10 +27,10 @@ class BaseNode(ABC):
     def image_to_base64(self, image):
         """Convert numpy array to base64 string using PIL, not matplotlib"""
         if image is None:
-            print("Warning: image_to_base64 called with None image")
+            custom_print("Warning: image_to_base64 called with None image\n\n")
             return None
         try:
-            print(f"Converting image to base64, shape: {image.shape}, dtype: {image.dtype}")
+            custom_print(f"Converting image to base64, shape: {image.shape}, dtype: {image.dtype}")
             from PIL import Image
             import io, base64
             # Ensure image is uint8
@@ -47,10 +49,10 @@ class BaseNode(ABC):
             buffer.seek(0)
             img_str = base64.b64encode(buffer.getvalue()).decode()
             result = f"data:image/png;base64,{img_str}"
-            print(f"Base64 conversion successful, length: {len(result)}")
+            custom_print(f"Base64 conversion successful, length: {len(result)}")
             return result
         except Exception as e:
-            print(f"Error converting image to base64: {e}")
+            custom_print(f"Error converting image to base64: {e}")
             import traceback
             traceback.print_exc()
             return None

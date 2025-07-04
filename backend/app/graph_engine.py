@@ -1,6 +1,83 @@
 import numpy as np
 from collections import defaultdict, deque
 import json
+import os
+from app import custom_print
+
+NODE_TYPE_MAP = {
+    'imageInputNode': 'ImageInput',
+    'imageInput': 'ImageInput',
+    'brightnessContrastNode': 'BrightnessContrast',
+    'brightnessContrast': 'BrightnessContrast',
+    'gaussianBlurNode': 'GaussianBlur',
+    'gaussianBlur': 'GaussianBlur',
+    'thresholdNode': 'Threshold',
+    'threshold': 'Threshold',
+    'edgeDetectionNode': 'EdgeDetection',
+    'edgeDetection': 'EdgeDetection',
+    'noiseNode': 'Noise',
+    'noise': 'Noise',
+    'colorChannelNode': 'ColorChannel',
+    'colorChannel': 'ColorChannel',
+    'customKernelNode': 'CustomKernel',
+    'customKernel': 'CustomKernel',
+    'outputNode': 'Output',
+    'output': 'Output',
+    'bitPlaneSlicingNode': 'BitPlaneSlicing',
+    'bitPlaneSlicing': 'BitPlaneSlicing',
+    'histogramEqualizationNode': 'HistogramEqualization',
+    'histogramEqualization': 'HistogramEqualization',
+    'contrastStretchingNode': 'ContrastStretching',
+    'contrastStretching': 'ContrastStretching',
+    'logPowerLawNode': 'LogPowerLaw',
+    'logPowerLaw': 'LogPowerLaw',
+    'imageNegationNode': 'ImageNegation',
+    'imageNegation': 'ImageNegation',
+    'grayLevelSlicingNode': 'GrayLevelSlicing',
+    'grayLevelSlicing': 'GrayLevelSlicing',
+    'medianFilterNode': 'MedianFilter',
+    'medianFilter': 'MedianFilter',
+    'laplacianFilterNode': 'LaplacianFilter',
+    'laplacianFilter': 'LaplacianFilter',
+    'sobelFilterNode': 'SobelFilter',
+    'sobelFilter': 'SobelFilter',
+    'fourierTransformNode': 'FourierTransform',
+    'fourierTransform': 'FourierTransform',
+    'highPassFilterNode': 'HighPassFilter',
+    'highPassFilter': 'HighPassFilter',
+    'lowPassFilterNode': 'LowPassFilter',
+    'lowPassFilter': 'LowPassFilter',
+    'resizeBiggerNode': 'ResizeBigger',
+    'resizeBigger': 'ResizeBigger',
+    'resizeSmallerNode': 'ResizeSmaller',
+    'resizeSmaller': 'ResizeSmaller',
+    'stretchNode': 'Stretch',
+    'stretch': 'Stretch',
+    'cropNode': 'Crop',
+    'crop': 'Crop',
+    'rotateNode': 'Rotate',
+    'rotate': 'Rotate',
+    'averageFilteringNode': 'AverageFiltering',
+    'averageFiltering': 'AverageFiltering',
+    'gaussianKernelNode': 'GaussianKernel',
+    'gaussianKernel': 'GaussianKernel',
+    'weightedFilteringNode': 'WeightedFiltering',
+    'weightedFiltering': 'WeightedFiltering',
+    'medianFilteringNode': 'MedianFiltering',
+    'medianFiltering': 'MedianFiltering',
+    'laplacianMaskNode': 'LaplacianMask',
+    'laplacianMask': 'LaplacianMask',
+    'unsharpMaskingNode': 'UnsharpMasking',
+    'unsharpMasking': 'UnsharpMasking',
+    'highBoostFilteringNode': 'HighBoostFiltering',
+    'highBoostFiltering': 'HighBoostFiltering',
+    'convolutionNode': 'Convolution',
+    'convolution': 'Convolution',
+    'crossCorrelationNode': 'CrossCorrelation',
+    'crossCorrelation': 'CrossCorrelation',
+    'glcmNode': 'GLCM',
+    'glcm': 'GLCM',
+}
 
 class GraphEngine:
     def __init__(self):
@@ -18,6 +95,32 @@ class GraphEngine:
         from .nodes.color_channels import ColorChannelNode
         from .nodes.custom_kernel import CustomKernelNode
         from .nodes.output import OutputNode
+        from .nodes.bit_plane_slicing import BitPlaneSlicingNode
+        from .nodes.histogram_equalization import HistogramEqualizationNode
+        from .nodes.contrast_stretching import ContrastStretchingNode
+        from .nodes.log_power_law import LogPowerLawNode
+        from .nodes.image_negation import ImageNegationNode
+        from .nodes.gray_level_slicing import GrayLevelSlicingNode
+        from .nodes.median_filter import MedianFilterNode
+        from .nodes.laplacian_filter import LaplacianFilterNode
+        from .nodes.sobel_filter import SobelFilterNode
+        from .nodes.fourier_transform import FourierTransformNode
+        from .nodes.high_pass_filter import HighPassFilterNode
+        from .nodes.low_pass_filter import LowPassFilterNode
+        from .nodes.resize_bigger import ResizeBiggerNode
+        from .nodes.resize_smaller import ResizeSmallerNode
+        from .nodes.stretch import StretchNode
+        from .nodes.crop import CropNode
+        from .nodes.rotate import RotateNode
+        from .nodes.average_filtering import AverageFilteringNode
+        from .nodes.gaussian_kernel import GaussianKernelNode
+        from .nodes.weighted_filtering import WeightedFilteringNode
+        from .nodes.laplacian_mask import LaplacianMaskNode
+        from .nodes.unsharp_masking import UnsharpMaskingNode
+        from .nodes.high_boost_filtering import HighBoostFilteringNode
+        from .nodes.convolution import ConvolutionNode
+        from .nodes.cross_correlation import CrossCorrelationNode
+        from .nodes.glcm import GLCMNode
         
         self.node_classes = {
             'ImageInput': ImageInputNode,
@@ -28,38 +131,45 @@ class GraphEngine:
             'Noise': NoiseNode,
             'ColorChannel': ColorChannelNode,
             'CustomKernel': CustomKernelNode,
-            'Output': OutputNode
+            'Output': OutputNode,
+            'BitPlaneSlicing': BitPlaneSlicingNode,
+            'HistogramEqualization': HistogramEqualizationNode,
+            'ContrastStretching': ContrastStretchingNode,
+            'LogPowerLaw': LogPowerLawNode,
+            'ImageNegation': ImageNegationNode,
+            'GrayLevelSlicing': GrayLevelSlicingNode,
+            'MedianFilter': MedianFilterNode,
+            'MedianFiltering': MedianFilterNode,
+            'LaplacianFilter': LaplacianFilterNode,
+            'SobelFilter': SobelFilterNode,
+            'FourierTransform': FourierTransformNode,
+            'HighPassFilter': HighPassFilterNode,
+            'LowPassFilter': LowPassFilterNode,
+            'ResizeBigger': ResizeBiggerNode,
+            'ResizeSmaller': ResizeSmallerNode,
+            'Stretch': StretchNode,
+            'Crop': CropNode,
+            'Rotate': RotateNode,
+            'AverageFiltering': AverageFilteringNode,
+            'GaussianKernel': GaussianKernelNode,
+            'WeightedFiltering': WeightedFilteringNode,
+            'LaplacianMask': LaplacianMaskNode,
+            'UnsharpMasking': UnsharpMaskingNode,
+            'HighBoostFiltering': HighBoostFilteringNode,
+            'Convolution': ConvolutionNode,
+            'CrossCorrelation': CrossCorrelationNode,
+            'GLCM': GLCMNode,
         }
+        
+        self.state_file = os.path.join(os.path.dirname(__file__), 'graph_state.json')
+        self.load_graph_state_from_disk()
     
     def add_node(self, node_id, node_type, params=None):
         """Add a node to the graph"""
-        # Map frontend node types to backend node types
-        node_type_mapping = {
-            'imageInputNode': 'ImageInput',
-            'imageInput': 'ImageInput',
-            'brightnessContrastNode': 'BrightnessContrast',
-            'brightnessContrast': 'BrightnessContrast',
-            'gaussianBlurNode': 'GaussianBlur',
-            'gaussianBlur': 'GaussianBlur',
-            'thresholdNode': 'Threshold',
-            'threshold': 'Threshold',
-            'edgeDetectionNode': 'EdgeDetection',
-            'edgeDetection': 'EdgeDetection',
-            'noiseNode': 'Noise',
-            'noise': 'Noise',
-            'colorChannelNode': 'ColorChannel',
-            'colorChannel': 'ColorChannel',
-            'customKernelNode': 'CustomKernel',
-            'customKernel': 'CustomKernel',
-            'outputNode': 'Output',
-            'output': 'Output',
-            'mergeNode': 'Merge',
-            'merge': 'Merge'
-        }
-        backend_node_type = node_type_mapping.get(node_type, node_type)
-        if backend_node_type not in self.node_classes:
+        backend_node_type = NODE_TYPE_MAP.get(node_type, node_type)
+        node_class = self.node_classes.get(backend_node_type)
+        if node_class is None:
             raise ValueError(f"Unknown node type: {node_type}")
-        node_class = self.node_classes[backend_node_type]
         node_instance = node_class(node_id, params or {})
         self.nodes[node_id] = {
             'id': node_id,
@@ -69,6 +179,7 @@ class GraphEngine:
             'metadata': {}
         }
         self.node_instances[node_id] = node_instance
+        self.save_graph_state_to_disk()
         return node_instance
     
     def remove_node(self, node_id):
@@ -82,6 +193,7 @@ class GraphEngine:
         # Remove connections involving this node
         self.connections = [conn for conn in self.connections 
                           if conn['from_node'] != node_id and conn['to_node'] != node_id]
+        self.save_graph_state_to_disk()
     
     def add_connection(self, from_node, from_socket, to_node, to_socket):
         """Add a connection between nodes, avoiding duplicates"""
@@ -96,6 +208,7 @@ class GraphEngine:
         }
         if connection not in self.connections:
             self.connections.append(connection)
+        self.save_graph_state_to_disk()
     
     def remove_connection(self, from_node, from_socket, to_node, to_socket):
         """Remove a connection between nodes"""
@@ -104,6 +217,7 @@ class GraphEngine:
                                  conn['from_socket'] == from_socket and
                                  conn['to_node'] == to_node and 
                                  conn['to_socket'] == to_socket)]
+        self.save_graph_state_to_disk()
     
     def would_create_cycle(self, from_node, to_node):
         """Check if adding a connection would create a cycle"""
@@ -190,11 +304,11 @@ class GraphEngine:
     def execute_graph(self):
         """Execute the entire graph in topological order"""
         try:
-            print(f"Executing graph with {len(self.nodes)} nodes and {len(self.connections)} connections")
+            custom_print(f"Executing graph with {len(self.nodes)} nodes and {len(self.connections)} connections")
             
             # Get execution order
             execution_order = self.get_topological_order()
-            print(f"Execution order: {execution_order}")
+            custom_print(f"Execution order: {execution_order}\n")
             
             # Store results for each node
             node_results = {}
@@ -202,16 +316,16 @@ class GraphEngine:
             # Execute nodes in order
             for node_id in execution_order:
                 if node_id not in self.node_instances:
-                    print(f"Warning: Node {node_id} not found in instances")
+                    custom_print(f"Warning: Node {node_id} not found in instances")
                     continue
                 
                 node_instance = self.node_instances[node_id]
-                print(f"Processing node {node_id} of type {node_instance.__class__.__name__}")
+                custom_print(f"Processing node {node_id} of type {node_instance.__class__.__name__}")
                 
                 # Gather inputs
                 inputs = {}
                 node_inputs = self.get_node_inputs(node_id)
-                print(f"Node {node_id} inputs: {node_inputs}")
+                custom_print(f"Node {node_id} inputs: {node_inputs}")
                 
                 for socket_name, connection in node_inputs.items():
                     from_node = connection['from_node']
@@ -219,28 +333,28 @@ class GraphEngine:
                         from_socket = connection['from_socket']
                         if from_socket in node_results[from_node]:
                             inputs[socket_name] = node_results[from_node][from_socket]
-                            print(f"  Input {socket_name}: {type(node_results[from_node][from_socket])}")
+                            custom_print(f"  Input {socket_name}: {type(node_results[from_node][from_socket])}")
                         else:
-                            print(f"  Warning: Socket {from_socket} not found in {from_node} results")
+                            custom_print(f"  Warning: Socket {from_socket} not found in {from_node} results")
                     else:
-                        print(f"  Warning: Node {from_node} not found in results")
+                        custom_print(f"  Warning: Node {from_node} not found in results")
                 
                 # Process node
                 result = node_instance.process(inputs)
                 node_results[node_id] = result
-                print(f"  Result keys: {list(result.keys()) if result else 'None'}")
+                custom_print(f"  Result keys: {list(result.keys()) if result else 'None'}")
                 
                 # Check if image was produced
                 if result and 'image' in result and result['image'] is not None:
-                    print(f"  Image shape: {result['image'].shape}")
+                    custom_print(f"  Image shape: {result['image'].shape}")
                 else:
-                    print(f"  No image in result")
+                    custom_print(f"  No image in result")
             
-            print(f"Final results: {list(node_results.keys())}")
+            custom_print(f"Final results: {list(node_results.keys())}")
             return node_results
             
         except Exception as e:
-            print(f"Error executing graph: {e}")
+            custom_print(f"Error executing graph: {e}")
             import traceback
             traceback.print_exc()
             return {}
@@ -250,24 +364,70 @@ class GraphEngine:
         if node_id in self.node_instances:
             node_instance = self.node_instances[node_id]
             node_instance.params.update(params)
+            custom_print(f"Updating node {node_id} with params: {params}")
             
-            # Update specific parameters based on node type
-            if hasattr(node_instance, 'brightness') and 'brightness' in params:
-                node_instance.brightness = params['brightness']
-            if hasattr(node_instance, 'contrast') and 'contrast' in params:
-                node_instance.contrast = params['contrast']
-            if hasattr(node_instance, 'radius') and 'radius' in params:
-                node_instance.radius = params['radius']
-            if hasattr(node_instance, 'threshold_value') and 'threshold' in params:
-                node_instance.threshold_value = params['threshold']
-            if hasattr(node_instance, 'method') and 'method' in params:
-                node_instance.method = params['method']
-            if hasattr(node_instance, 'noise_type') and 'type' in params:
-                node_instance.noise_type = params['type']
-            if hasattr(node_instance, 'channel') and 'channel' in params:
-                node_instance.channel = params['channel']
-            if hasattr(node_instance, 'kernel') and 'kernel' in params:
-                node_instance.kernel = np.array(params['kernel'])
+            # Update all possible node attributes based on parameter names
+            for param_name, param_value in params.items():
+                if hasattr(node_instance, param_name):
+                    # Ensure proper type conversion for specific parameters
+                    if param_name in ['min', 'max', 'threshold', 'low_threshold', 'high_threshold', 'bit_plane', 'kernel_size']:
+                        param_value = int(param_value)
+                    elif param_name in ['brightness', 'contrast', 'radius', 'intensity', 'salt_pepper_ratio', 'gamma', 'cutoff', 'boost']:
+                        param_value = float(param_value)
+                    elif param_name in ['highlight']:
+                        param_value = bool(param_value)
+                    
+                    setattr(node_instance, param_name, param_value)
+                    custom_print(f"  Updated {param_name} = {param_value} (type: {type(param_value).__name__})")
+                
+                # Handle special parameter mappings
+                if param_name == 'threshold' and hasattr(node_instance, 'threshold_value'):
+                    node_instance.threshold_value = param_value
+                    custom_print(f"  Updated threshold_value = {param_value}")
+                elif param_name == 'type' and hasattr(node_instance, 'noise_type'):
+                    node_instance.noise_type = param_value
+                    custom_print(f"  Updated noise_type = {param_value}")
+                elif param_name == 'type' and hasattr(node_instance, 'threshold_type'):
+                    node_instance.threshold_type = param_value
+                    custom_print(f"  Updated threshold_type = {param_value}")
+                elif param_name == 'kernel' and hasattr(node_instance, 'kernel'):
+                    node_instance.kernel = np.array(param_value)
+                    custom_print(f"  Updated kernel = {param_value}")
+                elif param_name == 'kernel_size' and hasattr(node_instance, 'kernel_size'):
+                    node_instance.kernel_size = param_value
+                    custom_print(f"  Updated kernel_size = {param_value}")
+                elif param_name == 'cutoff' and hasattr(node_instance, 'cutoff'):
+                    node_instance.cutoff = param_value
+                    custom_print(f"  Updated cutoff = {param_value}")
+                elif param_name == 'boost' and hasattr(node_instance, 'boost'):
+                    node_instance.boost = param_value
+                    custom_print(f"  Updated boost = {param_value}")
+                elif param_name == 'intensity' and hasattr(node_instance, 'intensity'):
+                    node_instance.intensity = param_value
+                    custom_print(f"  Updated intensity = {param_value}")
+                elif param_name == 'salt_pepper_ratio' and hasattr(node_instance, 'salt_pepper_ratio'):
+                    node_instance.salt_pepper_ratio = param_value
+                    custom_print(f"  Updated salt_pepper_ratio = {param_value}")
+                elif param_name == 'bit_plane' and hasattr(node_instance, 'bit_plane'):
+                    node_instance.bit_plane = param_value
+                    custom_print(f"  Updated bit_plane = {param_value}")
+                elif param_name == 'mode' and hasattr(node_instance, 'mode'):
+                    node_instance.mode = param_value
+                    custom_print(f"  Updated mode = {param_value}")
+                elif param_name == 'gamma' and hasattr(node_instance, 'gamma'):
+                    node_instance.gamma = param_value
+                    custom_print(f"  Updated gamma = {param_value}")
+                elif param_name == 'highlight' and hasattr(node_instance, 'highlight'):
+                    node_instance.highlight = param_value
+                    custom_print(f"  Updated highlight = {param_value}")
+                elif param_name == 'low_threshold' and hasattr(node_instance, 'low_threshold'):
+                    node_instance.low_threshold = param_value
+                    custom_print(f"  Updated low_threshold = {param_value}")
+                elif param_name == 'high_threshold' and hasattr(node_instance, 'high_threshold'):
+                    node_instance.high_threshold = param_value
+                    custom_print(f"  Updated high_threshold = {param_value}")
+            
+            self.save_graph_state_to_disk()
     
     def get_graph_state(self):
         """Get the current state of the graph as JSON, including position and metadata"""
@@ -304,6 +464,7 @@ class GraphEngine:
             }
             self.add_node(node_id, node_type, params)
         self.connections = state.get('connections', [])
+        self.save_graph_state_to_disk()
     
     def set_connections(self, connections):
         """Set all connections at once, deduplicating them"""
@@ -315,3 +476,21 @@ class GraphEngine:
                 seen.add(key)
                 unique.append(conn)
         self.connections = unique 
+
+    def save_graph_state_to_disk(self):
+        try:
+            state = self.get_graph_state()
+            with open(self.state_file, 'w') as f:
+                json.dump(state, f)
+        except Exception as e:
+            custom_print(f"Error saving graph state: {e}")
+
+    def load_graph_state_from_disk(self):
+        try:
+            if os.path.exists(self.state_file):
+                with open(self.state_file, 'r') as f:
+                    state = json.load(f)
+                self.load_graph_state(state)
+                custom_print("Graph state loaded from disk.")
+        except Exception as e:
+            custom_print(f"Error loading graph state: {e}") 

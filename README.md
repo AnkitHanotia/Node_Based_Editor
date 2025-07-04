@@ -6,7 +6,9 @@ A web-based node-based image processing interface built with React.js frontend a
 
 - **Drag-and-Drop Node Interface**: Intuitive visual programming interface using React Flow
 - **Real-time Processing**: Live preview updates as you modify parameters
-- **Comprehensive Node Library**: 9 different node types for various image processing operations
+- **Comprehensive Node Library**: Extensive node types for various image processing operations, organized by category
+- **Feature Extraction**: Dedicated category for feature extraction nodes (e.g., GLCM)
+- **All Nodes Menu**: Easily browse and add nodes by category using the All Nodes button in the toolbar
 - **DAG Execution**: Directed Acyclic Graph ensures proper processing order
 - **Modern UI**: Dark theme with responsive design
 - **Save/Load**: Persist your node graphs as JSON
@@ -149,24 +151,65 @@ The frontend will be available at `http://localhost:3000`
 
 7. **View results** in the Output node and preview panel
 
-### Node Types
+### Node Categories and Nodes
 
-#### Input/Output Nodes
-- **Image Input**: Upload and load images, displays metadata
+#### Input/Output
+- **Image Input**: Upload and load images
 - **Output**: Display final processed image
 
-#### Adjustment Nodes
-- **Brightness & Contrast**: Adjust image brightness (-1 to 1) and contrast (0.1 to 3.0)
+#### Adjustments
+- **Brightness & Contrast**: Adjust brightness and contrast
 
-#### Filter Nodes
-- **Gaussian Blur**: Apply Gaussian blur with configurable radius
-- **Threshold**: Binary, binary inverse, truncate, to zero operations
-- **Edge Detection**: Sobel and Canny edge detection methods
-- **Custom Kernel**: Apply custom 3x3 or 5x5 convolution kernels
+#### Filters
+- **Gaussian Blur**: Apply Gaussian blur filter
+- **Threshold**: Apply thresholding operations
+- **Edge Detection**: Detect edges using Sobel or Canny
+- **Custom Kernel**: Apply custom convolution kernel
+- **Bit-plane Slicing**: Extract or compose bit-planes from image
 
-#### Effect Nodes
-- **Noise**: Add Gaussian, salt & pepper, or uniform noise
-- **Color Channel**: Extract individual RGB channels or convert to grayscale
+#### Effects
+- **Noise**: Add synthetic noise to image
+- **Color Channel**: Extract individual color channels
+
+#### Geometric Transformations
+- **Resize (Bigger)**: Resize the image to a larger scale
+- **Resize (Smaller)**: Resize the image to a smaller scale
+- **Stretch**: Stretch the image width or height
+- **Crop**: Crop a region from the image
+- **Rotate**: Rotate the image by a given angle
+
+#### Spatial Domain
+- **Histogram Equalization**: Enhance image contrast using histogram equalization
+- **Contrast Stretching**: Stretch the contrast of the image
+- **Log/Power-law Transform**: Apply log or power-law (gamma) transformation
+- **Image Negation**: Invert the image (negative)
+- **Gray-level Slicing**: Highlight specific gray levels in the image
+- **Median Filter**: Apply median filtering
+- **Gaussian Blur**: Apply Gaussian blur filter
+- **Laplacian Filter**: Apply Laplacian filtering
+- **Sobel Filter**: Apply Sobel edge detection
+
+#### Frequency Domain
+- **Fourier Transform (FFT)**: Compute the Fast Fourier Transform of the input image
+- **High-pass Filtering**: Apply a high-pass filter in the frequency domain
+- **Low-pass Filtering**: Apply a low-pass filter in the frequency domain
+
+#### Filtering and Enhancement
+- **Average Filtering**: Apply average (mean) filter
+- **Gaussian Filtering**: Apply Gaussian filter
+- **Weighted Filtering**: Apply weighted filter
+- **Median Filtering**: Apply median filter
+- **Laplacian Mask**: Apply Laplacian mask
+- **Gaussian Kernel**: Apply Gaussian kernel
+- **Unsharp Masking**: Apply unsharp masking
+- **High-Boost Filtering**: Apply high-boost filtering
+- **Low-pass Filtering**: Apply a low-pass filter in the frequency domain
+- **High-pass Filtering**: Apply a high-pass filter in the frequency domain
+- **Convolution**: Apply convolution with custom kernel
+- **Cross-Correlation**: Apply cross-correlation with custom kernel
+
+#### Feature Extraction
+- **GLCM**: Compute Gray Level Co-occurrence Matrix
 
 ### Keyboard Shortcuts
 
@@ -203,78 +246,65 @@ python_node_editor/
 │   │   ├── __init__.py          # Flask app initialization
 │   │   ├── routes.py            # API endpoints
 │   │   ├── graph_engine.py      # DAG execution engine
+│   │   ├── graph_state.json     # Graph state persistence
 │   │   └── nodes/               # Node processing modules
-│   │       ├── base.py          # Base node class
-│   │       ├── image_input.py   # Image input node
+│   │       ├── __init__.py
+│   │       ├── average_filtering.py
+│   │       ├── base.py
+│   │       ├── bit_plane_slicing.py
 │   │       ├── brightness_contrast.py
-│   │       ├── gaussian_blur.py
-│   │       ├── threshold.py
-│   │       ├── edge_detection.py
-│   │       ├── noise.py
 │   │       ├── color_channels.py
+│   │       ├── contrast_stretching.py
+│   │       ├── convolution.py
+│   │       ├── crop.py
+│   │       ├── cross_correlation.py
 │   │       ├── custom_kernel.py
-│   │       └── output.py
+│   │       ├── edge_detection.py
+│   │       ├── fourier_transform.py
+│   │       ├── gaussian_blur.py
+│   │       ├── gaussian_kernel.py
+│   │       ├── glcm.py
+│   │       ├── gray_level_slicing.py
+│   │       ├── high_boost_filtering.py
+│   │       ├── high_pass_filter.py
+│   │       ├── histogram_equalization.py
+│   │       ├── image_input.py
+│   │       ├── image_negation.py
+│   │       ├── laplacian_filter.py
+│   │       ├── laplacian_mask.py
+│   │       ├── log_power_law.py
+│   │       ├── low_pass_filter.py
+│   │       ├── median_filter.py
+│   │       ├── noise.py
+│   │       ├── output.py
+│   │       ├── resize_bigger.py
+│   │       ├── resize_smaller.py
+│   │       ├── rotate.py
+│   │       ├── sobel_filter.py
+│   │       ├── stretch.py
+│   │       ├── threshold.py
+│   │       ├── unsharp_masking.py
+│   │       ├── weighted_filtering.py
 │   └── run.py                   # Flask entry point
 ├── frontend/
 │   ├── public/
 │   │   └── index.html
 │   ├── src/
+│   │   ├── App.js               # Main application component
+│   │   ├── App.css              # Main styles
+│   │   ├── index.js             # React entry point
+│   │   ├── index.css            # Global styles
 │   │   ├── components/
+│   │   │   ├── AllNodesMenu.js  # All nodes mega menu
 │   │   │   ├── NodePanel.js     # Node selection panel
 │   │   │   ├── PreviewPanel.js  # Image preview and parameters
 │   │   │   ├── Toolbar.js       # Main toolbar
 │   │   │   └── nodes/           # Custom React Flow nodes
+│   │   │       ├── (all node components, e.g. GLCMNode.js, OutputNode.js, MedianFilteringNode.js, etc.)
 │   │   ├── utils/
 │   │   │   ├── api.js           # API communication
 │   │   │   └── nodeFactory.js   # Node creation utilities
-│   │   ├── App.js               # Main application component
-│   │   ├── App.css              # Main styles
-│   │   ├── index.js             # React entry point
-│   │   └── index.css            # Global styles
 │   └── package.json
 ├── requirements.txt             # Python dependencies
 └── README.md
 ```
-
-## 🎨 Customization
-
-### Adding New Nodes
-
-1. **Backend**: Create a new node class in `backend/app/nodes/`
-2. **Frontend**: Add node configuration to `frontend/src/utils/nodeFactory.js`
-3. **Frontend**: Create custom React component in `frontend/src/components/nodes/`
-
-### Styling
-
-The application uses a dark theme with CSS custom properties. Main styles are in:
-- `frontend/src/App.css` - Layout and component styles
-- `frontend/src/index.css` - Global styles and React Flow customization
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-1. **Backend not starting**: Check if all Python dependencies are installed
-2. **Frontend not connecting**: Ensure backend is running on port 5000
-3. **Image upload fails**: Check file size (max 16MB) and format
-4. **Processing errors**: Check browser console for API errors
-
-### Debug Mode
-
-Enable debug mode by setting `FLASK_ENV=development` before running the backend.
-
-## 📝 License
-
-This project is open source and available under the MIT License.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## 📞 Support
-
-For issues and questions, please open an issue on the GitHub repository. 

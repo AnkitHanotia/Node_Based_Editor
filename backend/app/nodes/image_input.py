@@ -2,6 +2,7 @@ import numpy as np
 from PIL import Image
 import io
 from .base import BaseNode
+from app import custom_print
 
 class ImageInputNode(BaseNode):
     def __init__(self, node_id, params=None):
@@ -29,7 +30,7 @@ class ImageInputNode(BaseNode):
             
             return True
         except Exception as e:
-            print(f"Error loading image: {e}")
+            custom_print(f"Error loading image: {e}")
             return False
     
     def process(self, inputs):

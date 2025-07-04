@@ -8,6 +8,7 @@ from PIL import Image
 import numpy as np
 import json
 import traceback
+from app import custom_print
 
 main = Blueprint('main', __name__)
 
@@ -42,7 +43,7 @@ def serialize_results(results):
                     base64_str = base64.b64encode(buffer.getvalue()).decode('utf-8')
                     serialized[node_id][key] = f"data:image/png;base64,{base64_str}"
                 except Exception as e:
-                    print(f"Error serializing numpy array for {node_id}.{key}: {e}")
+                    custom_print(f"Error serializing numpy array for {node_id}.{key}: {e}")
                     serialized[node_id][key] = None
             elif isinstance(value, dict):
                 # Recursively serialize nested dictionaries
@@ -74,7 +75,7 @@ def upload_image():
         if not node_id:
             return jsonify({'error': 'No node_id provided'}), 400
         
-        print(f"Uploading image to node: {node_id}")
+        custom_print(f"Uploading image to node: {node_id}\n")
         
         # Check if node exists
         if node_id not in graph_engine.node_instances:
@@ -82,11 +83,22 @@ def upload_image():
         
         node_instance = graph_engine.node_instances[node_id]
         
+        # Update min/max params if present in form
+        min_val = request.form.get('min')
+        max_val = request.form.get('max')
+        params = {}
+        if min_val is not None:
+            params['min'] = int(min_val)
+        if max_val is not None:
+            params['max'] = int(max_val)
+        if params:
+            graph_engine.update_node_params(node_id, params)
+        
         # Set image in the node
         if hasattr(node_instance, 'set_image'):
             success = node_instance.set_image(file)
             if success:
-                print(f"Image uploaded successfully to {node_id}")
+                custom_print(f"Image uploaded successfully to {node_id}")
                 # Execute graph to get updated results
                 results = graph_engine.execute_graph()
                 return jsonify({
@@ -100,7 +112,7 @@ def upload_image():
             return jsonify({'error': 'Node does not support image input'}), 400
             
     except Exception as e:
-        print(f"Error in upload: {e}")
+        custom_print(f"Error in upload: {e}")
         import traceback
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
@@ -110,12 +122,12 @@ def process_graph():
     """Process the entire graph and return results"""
     try:
         data = request.get_json() or {}
-        print(f"Processing graph with data: {data}")
+        custom_print(f"Processing graph with data: {data}")
         
         # Update node parameters if provided
         if 'node_updates' in data:
             for node_id, params in data['node_updates'].items():
-                print(f"Updating node {node_id} with params: {params}")
+                custom_print(f"Updating node {node_id} with params: {params}")
                 graph_engine.update_node_params(node_id, params)
         
         # Add connections if provided
@@ -123,21 +135,21 @@ def process_graph():
             graph_engine.set_connections(data['connections'])
         
         # Execute graph
-        print("Executing graph...")
+        custom_print("Executing graph...")
         results = graph_engine.execute_graph()
-        print(f"Graph execution results: {list(results.keys())}")
+        custom_print(f"Graph execution results: {list(results.keys())}")
         
         # Check if output node has results
         output_nodes = [node_id for node_id, node_data in graph_engine.nodes.items() 
                        if node_data['type'] == 'Output']
-        print(f"Output nodes: {output_nodes}")
+        custom_print(f"Output nodes: {output_nodes}")
         
         for output_node in output_nodes:
             if output_node in results:
                 output_result = results[output_node]
-                print(f"Output node {output_node} result: {list(output_result.keys())}")
+                custom_print(f"Output node {output_node} result: {list(output_result.keys())}")
                 if 'preview' in output_result:
-                    print(f"Output node {output_node} has preview: {output_result['preview'][:100] if output_result['preview'] else 'None'}...")
+                    custom_print(f"Output node {output_node} has preview: {output_result['preview'][:100] if output_result['preview'] else 'None'}...")
         
         return jsonify({
             'success': True,
@@ -145,7 +157,7 @@ def process_graph():
         })
         
     except Exception as e:
-        print(f"Error in process: {e}")
+        custom_print(f"Error in process: {e}")
         import traceback
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
@@ -159,7 +171,7 @@ def add_node():
         node_type = data.get('node_type')
         params = data.get('params', {})
         
-        print(f"Adding node: {node_id} of type {node_type}")
+        custom_print(f"Adding node: {node_id} of type {node_type}")
         
         if not node_id or not node_type:
             return jsonify({'error': 'Missing node_id or node_type'}), 400
@@ -174,7 +186,7 @@ def add_node():
         })
         
     except Exception as e:
-        print(f"Error adding node: {e}")
+        custom_print(f"Error adding node: {e}")
         return jsonify({'error': str(e)}), 500
 
 @main.route('/remove_node', methods=['POST'])
@@ -208,7 +220,7 @@ def add_connection():
         to_node = data.get('to_node')
         to_socket = data.get('to_socket')
         
-        print(f"Adding connection: {from_node}:{from_socket} -> {to_node}:{to_socket}")
+        custom_print(f"Adding connection: {from_node}:{from_socket} -> {to_node}:{to_socket}")
         
         if not all([from_node, from_socket, to_node, to_socket]):
             return jsonify({'error': 'Missing connection parameters'}), 400
@@ -227,7 +239,7 @@ def add_connection():
         })
         
     except Exception as e:
-        print(f"Error adding connection: {e}")
+        custom_print(f"Error adding connection: {e}")
         return jsonify({'error': str(e)}), 500
 
 @main.route('/remove_connection', methods=['POST'])
@@ -302,8 +314,8 @@ def load_graph():
             'message': 'Graph loaded successfully'
         })
     except Exception as e:
-        print('Exception in /load_graph:', e)
-        print(traceback.format_exc())
+        custom_print('Exception in /load_graph:', e)
+        custom_print(traceback.format_exc())
         return jsonify({'error': str(e)}), 500
 
 @main.route('/download', methods=['POST'])

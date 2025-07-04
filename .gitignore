@@ -108,3 +108,5 @@ jspm_packages/
 
 # Uploads
 backend/uploads/ 
+backend/app/uploads/
+backend/app/graph_state.json 

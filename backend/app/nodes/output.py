@@ -7,11 +7,18 @@ class OutputNode(BaseNode):
     
     def process(self, inputs):
         """Display the final processed image"""
-        if 'image' not in inputs or inputs['image'] is None:
+        # Accept either 'image' or 'preview' from inputs
+        image = inputs.get('image')
+        preview = inputs.get('preview')
+        if image is None and preview is not None:
+            # If only preview is available, use it for display
+            return {
+                'image': None,
+                'preview': preview,
+                'metadata': None
+            }
+        if image is None:
             return {'image': None, 'preview': None}
-        
-        image = inputs['image']
-        
         return {
             'image': image,
             'preview': self.image_to_base64(image),
