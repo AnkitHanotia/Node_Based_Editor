@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { getNodeTypes } from '../utils/nodeFactory';
 
-const NodePanel = ({ onAddNode }) => {
+const NodePanel = ({ onAddNode, children }) => {
   const nodeTypes = getNodeTypes();
   const [search, setSearch] = useState('');
   const [openCategory, setOpenCategory] = useState(null);
@@ -91,7 +91,7 @@ const NodePanel = ({ onAddNode }) => {
 
   return (
     <div className="node-panel custom-node-panel">
-      <div className="node-panel-header">
+      <div className="node-panel-header" style={{ position: 'relative' }}>
         <h3>Nodes</h3>
         <input
           type="text"
@@ -100,6 +100,7 @@ const NodePanel = ({ onAddNode }) => {
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
+        {children}
       </div>
       <div className="node-panel-categories">
         {isSearching ? (

@@ -113,6 +113,7 @@ const App = () => {
   const fileInputRef = React.useRef();
   const [showAllNodesMenu, setShowAllNodesMenu] = useState(false);
   const latestRequestId = useRef(0);
+  const [showNodePanel, setShowNodePanel] = useState(true);
 
   // Add refs for nodes and edges after useState declarations
   const nodesRef = useRef(nodes);
@@ -591,8 +592,19 @@ const App = () => {
         onChange={onFileChange}
       />
       
-      <div className="main-content">
-        <NodePanel onAddNode={addNodeToCanvas} />
+      <div className="main-content" style={{ position: 'relative', height: '100%' }}>
+        {showNodePanel ? (
+          <NodePanel onAddNode={addNodeToCanvas}>
+            <button
+              className="node-panel-toggle"
+              style={{ position: 'absolute', top: 10, right: 10, zIndex: 10, background: '#3b444b', color: '#fff', border: '1px solid #444', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', fontSize: 20, paddingBottom: 3}}
+              onClick={() => setShowNodePanel(false)}
+              title="Hide Node Panel"
+            >
+              &laquo;
+            </button>
+          </NodePanel>
+        ) : null}
         
         <div className="canvas-container">
           <ReactFlow
@@ -613,6 +625,16 @@ const App = () => {
             <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
           </ReactFlow>
         </div>
+        {!showNodePanel && (
+          <button
+            className="node-panel-toggle-open"
+            style={{ position: 'fixed', top: 70, left: 8, zIndex: 20, background: '#3b444b', color: '#fff', border: '1px solid #444', borderRadius: '0 16px 16px 0', width: 32, height: 48, cursor: 'pointer', fontSize: 20 }}
+            onClick={() => setShowNodePanel(true)}
+            title="Show Node Panel"
+          >
+            &raquo;
+          </button>
+        )}
         
         <PreviewPanel 
           image={selectedNode?.data?.preview || previewImage} 
