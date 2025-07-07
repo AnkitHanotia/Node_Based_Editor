@@ -4,7 +4,6 @@ A web-based node-based image processing interface built with React.js frontend a
 
 ## 🚀 Features
 
-- **Drag-and-Drop Node Interface**: Intuitive visual programming interface using React Flow
 - **Real-time Processing**: Live preview updates as you modify parameters
 - **Comprehensive Node Library**: Extensive node types for various image processing operations, organized by category
 - **Feature Extraction**: Dedicated category for feature extraction nodes (e.g., GLCM)
