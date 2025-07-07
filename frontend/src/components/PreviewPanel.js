@@ -43,6 +43,13 @@ const PreviewPanel = ({ image, selectedNode, onUpdateParams, onFileUpload, uploa
   const [glcmAngles, setGlcmAngles] = useState(null);
   const [glcmLevels, setGlcmLevels] = useState(null);
   const [contrastWindowSize, setContrastWindowSize] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const handleImageClick = () => setModalOpen(true);
+  const handleCloseModal = (e) => {
+    if (e.target.className === 'modal-overlay' || e.target.className === 'modal-close') {
+      setModalOpen(false);
+    }
+  };
 
   useEffect(() => {
     if (!selectedNode) return;
@@ -854,7 +861,19 @@ const PreviewPanel = ({ image, selectedNode, onUpdateParams, onFileUpload, uploa
         </div>
       )}
       {image ? (
-        <img src={image} alt="Processed" className="preview-image" />
+        <>
+          <img src={image} alt="Processed" className="preview-image" style={{ cursor: 'pointer' }} onClick={handleImageClick} />
+          {modalOpen && (
+            <div className="modal-overlay" onClick={handleCloseModal} style={{
+              position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+            }}>
+              <div style={{ position: 'relative', background: '#222', padding: 16, borderRadius: 8, boxShadow: '0 2px 16px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <button className="modal-close" onClick={handleCloseModal} style={{ position: 'absolute', top: -16, right: -16, background: '#222', border: '2px solid #fff', color: '#fff', fontSize: 28, cursor: 'pointer', borderRadius: '50%', width: 36, height: 36, zIndex: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>&times;</button>
+                <img src={image} alt="Enlarged Preview" style={{ maxWidth: '80vw', maxHeight: '80vh', borderRadius: 8, display: 'block' }} />
+              </div>
+            </div>
+          )}
+        </>
       ) : (
         <div className="no-selection">
           No image to display. Add an Image Input node and upload an image.
